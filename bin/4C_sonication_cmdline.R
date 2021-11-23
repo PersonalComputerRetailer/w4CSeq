@@ -1,11 +1,11 @@
-#!/var/www/html/w4cseq/bin/R-3.1.2/bin/Rscript
+#!/home/ychen/mambaforge/envs/w4CSeq/bin/Rscript
 #args <- commandArgs(TRUE)
 options(bitmapType='cairo')
 source("sonication_config.r")
 
 
-genome <- paste(path_w4CSeq, "/w4cseq/lib/", build, "/", "genome.fa", sep="")
-work_dir <- paste(path_w4CSeq, "/w4cseq/work/", exp_name, sep="")
+genome <- paste(path_w4CSeq, "/w4CSeq/lib/", build, "/", "genome.fa", sep="")
+work_dir <- paste(path_w4CSeq, "/w4CSeq/work/", exp_name, sep="")
 
 chipdata <- "no"
 FDR <- as.numeric(FDR)
@@ -73,19 +73,19 @@ file2_merge_score_bed<-"paired_end_dist_sort_merge_filter2_Z.bed"
 file2_merge_score_FDR_bed<-"paired_end_dist_sort_merge_filter2_Z_FDR.bed"
 
 
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/fastq_trunk.pl ", file_in1, " ", file_sel1, " ", unzip, sep=""))
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/fastq_trunk.pl ", file_in2, " ", file_sel2, " ", unzip, sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/fastq_trunk.pl ", file_in1, " ", file_sel1, " ", unzip, sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/fastq_trunk.pl ", file_in2, " ", file_sel2, " ", unzip, sep=""))
 
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/fastq_convert.pl ", file_sel1, " > fastq_convert1.fq", sep=""))
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/fastq_convert.pl ", file_sel2, " > fastq_convert2.fq", sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/fastq_convert.pl ", file_sel1, " > fastq_convert1.fq", sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/fastq_convert.pl ", file_sel2, " > fastq_convert2.fq", sep=""))
 
 system("cp fastq_convert1.fq FASTQ_FOR_MAPPING1.fq")
 system("cp fastq_convert2.fq FASTQ_FOR_MAPPING2.fq")
 system("paste fastq_convert1.fq fastq_convert2.fq > fastq_convert.fqp")
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/fastq_filter2.pl fastq_convert.fqp > FASTQ_FILTERED.fqp", sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/fastq_filter2.pl fastq_convert.fqp > FASTQ_FILTERED.fqp", sep=""))
 
-system("cat FASTQ_FILTERED.fqp | awk '{print $1}' > FASTQ_FILTERED1.fq")
-system("cat FASTQ_FILTERED.fqp | awk '{print $2}' > FASTQ_FILTERED2.fq")
+system("cat FASTQ_FILTERED.fqp | awk -F '\t' '{print $1}' > FASTQ_FILTERED1.fq")
+system("cat FASTQ_FILTERED.fqp | awk -F '\t' '{print $2}' > FASTQ_FILTERED2.fq")
 
 if (file.info("FASTQ_FILTERED1.fq")$size == 0 || file.info("FASTQ_FILTERED2.fq")$size == 0) {
         stop("The file \"FASTQ_FILTERED1.fq\" or \"FASTQ_FILTERED2.fq\" is empty. No reads are available for analysis. Please check you parameters in sonication_config.r!\n")
@@ -99,10 +99,10 @@ system(paste(path_bwa, "/bwa samse ", genome, " ", file_sai1, " FASTQ_FILTERED1.
 system(paste(path_bwa, "/bwa samse ", genome, " ", file_sai2, " FASTQ_FILTERED2.fq > ", file_sam2, sep=""))
 system(paste(path_samtools, "/samtools view -b ", file_sam1, " -S > ", file_bam1, sep=""))
 system(paste(path_samtools, "/samtools view -b ", file_sam2, " -S > ", file_bam2, sep=""))
-system(paste(path_samtools, "/samtools sort -n ", file_bam1, " ", file_sort1, sep=""))
-system(paste(path_samtools, "/samtools sort -n ", file_bam2, " ", file_sort2, sep=""))
+system(paste(path_samtools, "/samtools sort -o ", file_sort_bam1, " -n ", file_bam1, sep=""))
+system(paste(path_samtools, "/samtools sort -o ", file_sort_bam2, " -n ", file_bam2, sep=""))
 system(paste(path_samtools, "/samtools merge -n ", file_bam, " ", file_sort_bam1, " ", file_sort_bam2, sep=""))
-system(paste(path_samtools, "/samtools sort ", file_bam, " sonic_sort", sep=""))
+system(paste(path_samtools, "/samtools sort -o sonic_sort.bam ", file_bam, sep=""))
 system(paste(path_samtools, "/samtools view -bq 1 sonic_sort.bam > sonic_sort_unique.bam", sep=""))
 system(paste(path_samtools, "/samtools index sonic_sort_unique.bam", sep=""))
 
@@ -111,8 +111,8 @@ system("cp sonic_sort_unique.bam MAPPED_BAM.bam")
 system("cp sonic_sort_unique.bam.bai MAPPED_BAM.bam.bai")
 
 system(paste(path_samtools, "/samtools view ", file_bam, " > ", file_sam, sep=""))
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/inter_pair.pl ", file_sam, " ", file1_bed, " ", bait_ch, " ", bait_st, " ", bait_en, " ", extend, " ", dist1, sep=""))
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/inter_pair.pl ", file_sam, " ", file2_bed, " ", bait_ch, " ", bait_st, " ", bait_en, " ", extend, " ", dist2, sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/inter_pair.pl ", file_sam, " ", file1_bed, " ", bait_ch, " ", bait_st, " ", bait_en, " ", extend, " ", dist1, sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/inter_pair.pl ", file_sam, " ", file2_bed, " ", bait_ch, " ", bait_st, " ", bait_en, " ", extend, " ", dist2, sep=""))
 system(paste("sort -k1,1 -k2,2n",file2_bed,">",file2_sort_bed))
 system(paste(path_bedtools, "/mergeBed -i ", file2_sort_bed, " -c 1 -o count -d ", merge, " > ",file2_merge_bed, sep=""))
 
@@ -130,15 +130,13 @@ system(paste(path_bedtools, "/intersectBed -a ", file2_merge_bed, " -b local.bed
 system(paste("cp ", file2_merge_bed, " UCSC_view.bed", sep=""))
 
 system(paste("sed -i '1s/^/browser position ", bait_ch, ":", as.numeric(bait_st)-10000, "-", as.numeric(bait_en)+10000, "\\nbrowser hide all\\nbrowser pack refGene encodeRegions\\ntrack type=bedGraph name=\"4C signal (raw reads) (", exp_name, ")\" description=\"4C read counts\" db=", build, " visibility=2 color=0,0,0 useScore=1 alwaysZero=on\\n/' UCSC_view.bed", sep=""))
-
-system(paste("cat distal_interact.bed | awk '{if($4>1 && $1!~/chrY/)print}' >",file2_merge_filter_bed))
+system(paste("cat distal_interact.bed | awk -F '\t' '{if($4>1 && $1 ~ /^chr(X|[0-9]{1,2})/) print}' >",file2_merge_filter_bed))
 system(paste("cp", file2_merge_filter_bed, "DISTAL_INTERACTION_SITES.bed"))
 
-system(paste(path_w4CSeq, "/w4cseq/bin/scripts/positive_region_binomial.pl ", file2_merge_filter_bed, " ", file2_merge_score_bed, " ", build, " ", size_inter, " ", size_intra, " ", window_intra, " ", bait_ch, sep=""))
+system(paste(path_w4CSeq, "/w4CSeq/bin/scripts/positive_region_binomial.pl ", file2_merge_filter_bed, " ", file2_merge_score_bed, " ", build, " ", size_inter, " ", size_intra, " ", window_intra, " ", bait_ch, sep=""))
 
-system("cp window.bed captured_sites_in_window.bed")
 system(paste("sed -i '1s/^/browser position ", bait_ch, ":1-100000000\\nbrowser hide all\\nbrowser pack refGene encodeRegions\\ntrack type=bedGraph name=\"4C signal (binarized) in window (", exp_name, ")\" description=\"4C read counts summed in window\" db=", build, " visibility=2 color=255,0,0 useScore=1 alwaysZero=on\\n/' window.bed", sep=""))
-
+system("cp window.bed captured_sites_in_window.bed")
 
 dat_P <- read.table("paired_end_dist_sort_merge_filter2_Z.bed")
 dat_P$V5 <- p.adjust(dat_P$V4, "fdr")
@@ -172,14 +170,14 @@ if(build=="hg19") {
   cyto.info<-UCSC.HG19.Human.CytoBandIdeogram
 }
 if(build=="hg18") {
-  cyto.info<-read.table(paste(path_w4CSeq, "/w4cseq/lib/hg18/cytobands_hg18.bed", sep=""), header=TRUE)
+  cyto.info<-read.table(paste(path_w4CSeq, "/w4CSeq/lib/hg18/cytobands_hg18.bed", sep=""), header=TRUE)
 }
 if(build=="mm10") {
   data(UCSC.Mouse.GRCm38.CytoBandIdeogram)
   cyto.info<-UCSC.Mouse.GRCm38.CytoBandIdeogram
 }
 if(build=="mm9") {
-  cyto.info<-read.table(paste(path_w4CSeq, "/w4cseq/lib/mm9/cytobands_mm9.bed", sep=""), header=TRUE)
+  cyto.info<-read.table(paste(path_w4CSeq, "/w4CSeq/lib/mm9/cytobands_mm9.bed", sep=""), header=TRUE)
 }
 
 circos<-read.table("table_for_CIRCOS.txt",header=FALSE)
@@ -997,7 +995,7 @@ if (build == "mm9") {
         #temp <- tempfile(fileext = ".txt.gz")
         #download.file("http://hgdownload.soe.ucsc.edu/goldenPath/mm9/database/cytoBand.txt.gz",temp)
         #mm9cytobands <- read.table(temp,sep="\t")
-	mm9cytobands <- read.table(paste(path_w4CSeq, "/w4cseq/lib/mm9/cytoBand.txt.gz", sep=""),sep="\t")
+	mm9cytobands <- read.table(paste(path_w4CSeq, "/w4CSeq/lib/mm9/cytoBand.txt.gz", sep=""),sep="\t")
         chrompos<-prepareGenomePlot(data.frame(CHR,MapInfo),paintCytobands = TRUE,organism="mmu",sexChromosomes = TRUE, unit = mm9cytobands)
 }
 rect(chrompos[,2], chrompos[,1]+0.1, chrompos[,2]+region$V3-region$V2, chrompos[,1]+0.3, col="red", border = "red")
@@ -1017,7 +1015,7 @@ if (build == "mm9") {
         #temp <- tempfile(fileext = ".txt.gz")
         #download.file("http://hgdownload.soe.ucsc.edu/goldenPath/mm9/database/cytoBand.txt.gz",temp)
         #mm9cytobands <- read.table(temp,sep="\t")
-	mm9cytobands <- read.table(paste(path_w4CSeq, "/w4cseq/lib/mm9/cytoBand.txt.gz", sep=""),sep="\t")
+	mm9cytobands <- read.table(paste(path_w4CSeq, "/w4CSeq/lib/mm9/cytoBand.txt.gz", sep=""),sep="\t")
         chrompos<-prepareGenomePlot(data.frame(CHR,MapInfo),paintCytobands = TRUE,organism="mmu",sexChromosomes = TRUE, unit = mm9cytobands)
 }
 rect(chrompos[,2], chrompos[,1]+0.1, chrompos[,2]+region$V3-region$V2, chrompos[,1]+0.3, col="red", border = "red")
@@ -1038,19 +1036,19 @@ system("wc SIGNIFICANT_REGIONS.bed | awk '{print \"The number of significant int
 
 
 #generate a gene distance distribution plot
-random_genome<-paste(path_w4CSeq, "/w4cseq/lib/",build,"/",build,"_random_100k_sorted.bed",sep="")
+random_genome<-paste(path_w4CSeq, "/w4CSeq/lib/",build,"/",build,"_random_100k_sorted.bed",sep="")
 
-system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_GENE_sorted.bed -D a > 4C_GENE.txt",sep=""))
-system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_GENE_sorted.bed -D a > All_GENE.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_GENE_sorted.bed -D a > 4C_GENE.txt",sep=""))
+system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_GENE_sorted.bed -D a > All_GENE.txt", sep=""))
 
-system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_TSS_sorted.bed -D a > 4C_TSS.txt", sep=""))
-system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_TSS_sorted.bed -D a > All_TSS.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_TSS_sorted.bed -D a > 4C_TSS.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_TSS_sorted.bed -D a > All_TSS.txt", sep=""))
 
-system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_TTS_sorted.bed -D a > 4C_TTS.txt", sep=""))
-system(paste(path_bedtools, "/closestBed -a ", random_genome," -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_TTS_sorted.bed -D a > All_TTS.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_TTS_sorted.bed -D a > 4C_TTS.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a ", random_genome," -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_TTS_sorted.bed -D a > All_TTS.txt", sep=""))
 
-system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_CPG_sorted.bed -D a > 4C_CPG.txt", sep=""))
-system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4cseq/lib/", build, "/", build, "_CPG_sorted.bed -D a > All_CPG.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a SIGNIFICANT_SITES.bed -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_CPG_sorted.bed -D a > 4C_CPG.txt", sep=""))
+system(paste(path_bedtools, "/closestBed -a ", random_genome, " -b ", path_w4CSeq, "/w4CSeq/lib/", build, "/", build, "_CPG_sorted.bed -D a > All_CPG.txt", sep=""))
 
 GENE_4C<-read.table("4C_GENE.txt",header=FALSE)
 TSS_4C<-read.table("4C_TSS.txt",header=FALSE)
@@ -1128,7 +1126,7 @@ if(build =="mm10" || build =="mm9") {
         cell_type<-c("ESC_46C","ESC_D3","ESC_TT2","iPSC","iPSC_1D4","iPSC_2D4","EPL_D3","EBM3_D3","EpiSC5","EpiSC7")
 }
 for(RD in (1:RD.tot)){
-        system(paste("cp ", path_w4CSeq, "/w4cseq/lib/", build, "/RD/RD", RD , "_GSM*.bed RD.bed", sep=""))
+        system(paste("cp ", path_w4CSeq, "/w4CSeq/lib/", build, "/RD/RD", RD , "_GSM*.bed RD.bed", sep=""))
         RD_data<-read.table("RD.bed",header=FALSE)
         system(paste(path_bedtools, "/windowBed -a RD.bed -b SIGNIFICANT_SITES.bed -u -w 50000 > RD_4C.bed", sep=""))
         RD_4C_data<-read.table("RD_4C.bed",header=FALSE)
