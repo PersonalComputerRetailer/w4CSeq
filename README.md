@@ -13,7 +13,7 @@ The combined plots will help uncover significant features in/around 4C regions.
 # Usage
 ## 1. Server
 ### *demo web server*
-* We provide a demo server [w4CSeq](http://w4cseq.wglab.org/) for you to examine. 
+* We provide a demo server [w4CSeq](http://w4cseq.wglab.org/) for you to examine.
 
 ### *build your own server*
 
@@ -22,17 +22,27 @@ Users can download the cutting edge version from GitHub by `git clone git@github
 
 ##### b. Software prerequisite
 The following softwares should be installed in your cluster before you build server or run w4CSeq command line.
-  * R (Packages: RCircos, quantsmooth)
-  * Perl (Module: Math::CDF, List::Util)
-  * BWA
-  * SAMtools
-  * BEDTools
+
+*Updated list at 11/23/2021*
+|Name                    |version|
+|:---                    |:---   |
+|R.                      | 4.1.1 |
+|RCircos                 | 1.2.1 |
+|quantsmooth             | 1.60.0|
+|perl                    | 5.26.2|
+|perl-math-cdf           | 0.1   |
+|perl-list-util          | 1.38  |
+|bwa                     | 0.7.17|
+|samtools                | 1.14  |
+|bedtools                | 2.30.0|
 
 ##### c. Build `lib` directory
 To build the required `lib` directory, users can download `lib.tar.gz` file from [here](http://w4cseq.wglab.org/W4CSEQ_files/lib.tar.gz).
 Then extract files under `/w4cseq/` directory by `tar -zxvf lib.tar.gz -C /PATH/TO/w4cseq/`. After that, there will be four sub-directories (`bin`, `cgi-bin`, `html`, `lib`) under `/w4cseq/`, and four sub-sub-directories (`hg19`, `hg18`, `mm10`, and `mm9`) under `/w4cseq/lib/`. 
 
 Each sub-directory (`hg19`, `hg18`, `mm10`, and `mm9`) under `/w4cseq/lib/` consists of genome sequence and index files (for BWA alignment); annotation files for TTSs, TSSs, CpG sites and genes; reduced library of genome-wide enzyme recognition sites; DNA replication timing annotation files; and cytoband definition file. 
+
+*NOTE: Check chromosome naming style in your reference genome. It must be like chr1, chr2... rather than 1, 2 ...*
 
 ##### d. Specify paths of softwares in program
   * ##### Enzyme-digestion based 4C-Seq 
@@ -185,3 +195,9 @@ caim@usc.edu
 * [w4CSeq Homepage](http://w4cseq.wglab.org)
 * [Wang Genomics Lab Homepage](http://genomics.usc.edu)
 
+---
+### 11/23/2021 Updates 
+1. Update syntax at line 102, 103, and 105 for newer version of `samtools sort` (ver. 1.14) in 4C_sonication_cmdline.R
+3. Add `-F '\t'` at line 87, 88, and 133 to catch correct column in 4C_sonication_cmdline.R
+4. Update regular expression to get rid of ALT locus at line 133 in 4C_sonication_cmdline.R
+5. Add precausion and update dependancies in README.md
